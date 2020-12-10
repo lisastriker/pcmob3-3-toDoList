@@ -1,57 +1,46 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useEffect} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import 'react-native-gesture-handler';
 import {createStackNavigator} from '@react-navigation/stack';
 import * as SQLite from 'expo-sqlite';
-import { Ionicons } from '@expo/vector-icons';
+import NoteStack from './NoteStack'
+import { TextInput } from 'react-native-gesture-handler';
+
+const db = SQLite.openDatabase("db.db"); //Opens this function and save it as a file
 
 
-function NoteScreen({navigation}){
-  function addNote(){
-    console.log("Hello")
+const RootStack = createStackNavigator();
+
+function ModalScreen({navigation}){
+  const [inputText, setText] = useState(null)
+
+  function addText(text){
+    console.log(text)
   }
-  //headerRight () because its a return
-  useEffect(()=> {
-    navigation.setOptions({
-      headerRight:()=>(
-        <TouchableOpacity onPress={addNote}>
-          <Ionicons name="ios-create-outline" size={24} style={{marginRight:10,}}></Ionicons>
-        </TouchableOpacity>
-      )
-    })
-  })
   return(
-    <View style={styles.container}>
-      <Text>Hello</Text>
-    </View>
+  <View>
+    <TextInput value={inputText} onChangeText={inputText=>setText(inputText)} 
+    onSubmitEditing={() => {
+      addText(inputText);
+      setText(null);
+    }} placeholder="Input task"></TextInput>
+    <Button onPress={()=>navigation.goBack()} title="Dismiss"></Button>
+    <Text>Modal Screen</Text>
+  </View>
   )
 }
-
-
-const Stack = createStackNavigator(); //I want headerStyle to not have color.
-export default function App() {
-  return (
+export default function App() { //<RootStack.Screen name="Modal" component={ModalScreen}/>
+  
+return (
     <NavigationContainer>
-      <Stack.Navigator>
-      <Stack.Screen options={{
-        title:"To-do App",
-        headerStyle:{backgroundColor:"FFC07F"},
-        headerTintColor:"#FFFFFF",
-        headerTitleStyle:{
-          color:"black",
-          fontWeight:24,
-          textAlign:"center",
-          shadowColor:"black",
-          shadowOpacity:0.5,
-          shadowRadius:0.2,
-        }
-        }}  name="Note" component={NoteScreen}/>
-      
-      </Stack.Navigator>
+    <RootStack.Navigator>
+    <RootStack.Screen name="Note" component={NoteStack}/>
+    <RootStack.Screen name="Modal" component={ModalScreen}/>
+    </RootStack.Navigator>
 
-    </NavigationContainer>
+  </NavigationContainer>
   );
 }
 
