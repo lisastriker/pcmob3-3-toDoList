@@ -8,9 +8,20 @@ import * as FileSystem from "expo-file-system";
 
 const db = SQLite.openDatabase("notes.db"); //Opens this function and save it as a file
 console.log(FileSystem.documentDirectory);
-export default function NoteScreen({navigation,route}){ //u get an object rows which contains an obj array
-  
+export default function NoteScreen({navigation, route}){ //u get an object rows which contains an obj array
+
   const [arrayItem, setArrayItem] = useState([]);
+  function refreshNotes() {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM notes",
+        null,
+        (txObj, { rows: { _array } }) => setArrayItem(_array),
+        (txObj, error) => console.log(`Error: ${error}`)
+      );
+    });
+  } //FUnction comes back with array result
+
    //Set up database on first run since pass empty array it runs once
    useEffect(() => {
     db.transaction(
@@ -28,33 +39,32 @@ export default function NoteScreen({navigation,route}){ //u get an object rows w
     );
   }, []);
 
-  function refreshNotes() {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM notes",
+  //useEffect procs when route.params.text is added //db.transaction((tx) => {}, null, refreshNotes)
+  useEffect(() => {
+    console.log("watching params")
+    if (route.params?.text) {
+      db.transaction(
+        (tx) => {
+          tx.executeSql("INSERT INTO notes (done, title) VALUES (0, ?)", [
+            route.params.text,
+          ]);
+        },
         null,
-        (txObj, { rows: { _array } }) => setArrayItem(_array),
-        (txObj, error) => console.log(`Error: ${error}`)
+        refreshNotes
       );
-    });
-  } //FUnction comes back with array result
- 
+    }
+  }, [route.params?.text]);
 
-
-    //useEffect procs when route.params.text is added //db.transaction((tx) => {}, null, refreshNotes)
-    useEffect(() => {
-      if (route.params?.text) {
-        db.transaction(
-          (tx) => {
-            tx.executeSql("INSERT INTO notes (done, title) VALUES (0, ?)", [
-              route.params.text,
-            ]);
-          },
-          null,
-          refreshNotes
-        );
-      }
-    }, [route.params?.text]);
+  //headerRight () because its a return
+    useEffect(()=> {
+      navigation.setOptions({
+        headerRight:()=>(
+          <TouchableOpacity onPress={addNote}>
+            <Ionicons name="ios-create-outline" size={24} style={{marginRight:10,}}></Ionicons>
+          </TouchableOpacity>
+        )
+      })
+    })
 
     function addNote(){
       navigation.navigate("Modal");
@@ -66,18 +76,10 @@ export default function NoteScreen({navigation,route}){ //u get an object rows w
       paddingBottom:10,
       borderBottomColor:"black",
       borderBottomWidth:1,
-    }}><Text>{item.title}</Text></View>
+      }}>
+      <Text>{item.title}</Text></View>
     }
-    //headerRight () because its a return
-    useEffect(()=> {
-      navigation.setOptions({
-        headerRight:()=>(
-          <TouchableOpacity onPress={addNote}>
-            <Ionicons name="ios-create-outline" size={24} style={{marginRight:10,}}></Ionicons>
-          </TouchableOpacity>
-        )
-      })
-    })
+
     return(
       <View style={styles.container}>
         <FlatList style={{width:"100%"}} 
@@ -86,7 +88,7 @@ export default function NoteScreen({navigation,route}){ //u get an object rows w
          keyExtractor={(item)=>item.id.toString()}></FlatList>
         </View>
     )
-  }
+}
 
   const styles = StyleSheet.create({
     container: {

@@ -1,12 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Button, TextInput } from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import 'react-native-gesture-handler';
 import {createStackNavigator} from '@react-navigation/stack';
 
 import NoteStack from './NoteStack'
-import { TextInput } from 'react-native-gesture-handler';
+
 
 
 
@@ -14,21 +14,23 @@ import { TextInput } from 'react-native-gesture-handler';
 const RootStack = createStackNavigator();
 
 function ModalScreen({navigation}){
-  const [inputText, setText] = useState("")
+  const [text, setText] = useState("")
 
 
   //use effect monitors route inputText in navigate is in curly braces because it must be sent as obj
   return(
   <View style={styles.container}>
-    <TextInput style={styles.textInput} value={inputText} onChangeText={(input)=>setText(input)} 
-    placeholder="Input task"></TextInput>
+    <TextInput style={styles.textInput} value={text} onChangeText={(input)=>setText(input)} 
+    placeholder="Input task">
+    </TextInput>
+
     <TouchableOpacity style={styles.button} onPress={()=>navigation.goBack()}>
       <Text>Dismiss</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate("Note",{ inputText })}>
+    <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate("Note",{ text })}>
       <Text>Save</Text>
     </TouchableOpacity>
-  <Text>{inputText}</Text>
+  <Text>{text}</Text>
   </View>
   )
 }
