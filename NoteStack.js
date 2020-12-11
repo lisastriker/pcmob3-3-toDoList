@@ -3,6 +3,7 @@ import React, {useEffect} from 'react';
 import NoteScreen from './NoteScreen'
 import 'react-native-gesture-handler';
 const Stack = createStackNavigator();
+
 export default function NoteStack(){
  // <Stack.Screen name="Modal" component={ModalScreen}></Stack.Screen> Why can't i put modal under this stack.
   return(
@@ -13,7 +14,6 @@ export default function NoteStack(){
         headerTintColor:"#FFFFFF",
         headerTitleStyle:{
           color:"black",
-          fontWeight:24,
           textAlign:"center",
           shadowColor:"black",
           shadowOpacity:0.5,
