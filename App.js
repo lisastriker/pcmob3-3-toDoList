@@ -4,36 +4,39 @@ import { StyleSheet, Text, View, TouchableOpacity, Button, TextInput } from 'rea
 import {NavigationContainer} from '@react-navigation/native';
 import 'react-native-gesture-handler';
 import {createStackNavigator} from '@react-navigation/stack';
-
 import NoteStack from './NoteStack'
-
-
-
-
 
 const RootStack = createStackNavigator();
 
 function ModalScreen({navigation}){
-  const [text, setText] = useState("")
+  const [text, setText] = useState("");
 
-
-  //use effect monitors route inputText in navigate is in curly braces because it must be sent as obj
-  return(
-  <View style={styles.container}>
-    <TextInput style={styles.textInput} value={text} onChangeText={(input)=>setText(input)} 
-    placeholder="Input task">
-    </TextInput>
-
-    <TouchableOpacity style={styles.button} onPress={()=>navigation.goBack()}>
-      <Text>Dismiss</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate("Note",{ text })}>
-      <Text>Save</Text>
-    </TouchableOpacity>
-  <Text>{text}</Text>
-  </View>
-  )
+  return (
+    <View style={[styles.container, { backgroundColor: "white" }]}>
+      <Text style={{ fontSize: 24 }}>What do you want to add?</Text>
+      <TextInput
+        style={styles.textInput}
+        value={text}
+        onChangeText={(input) => setText(input)}
+      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("Note", { text })}
+        >
+          <Text style={styles.buttonText}>Save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.buttonText}>Dismiss</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }
+
 export default function App() { //<RootStack.Screen name="Modal" component={ModalScreen}/>
   
 return (
@@ -59,7 +62,15 @@ const styles = StyleSheet.create({
     borderWidth:1,
     width:"80%"
   },
-  buttton:{
+  buttonContainer:{
     flexDirection:"row",
+  },
+  button: {
+    padding: 10,
+    backgroundColor: "orange",
+    borderRadius: 5,
+    margin: 10,
+    marginTop: 30,
+    width: 80,
   },
 });

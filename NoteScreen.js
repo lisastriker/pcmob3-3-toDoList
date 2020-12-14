@@ -1,29 +1,34 @@
-import {createStackNavigator} from '@react-navigation/stack';
-import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Button, FlatList } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import 'react-native-gesture-handler';
-import * as SQLite from 'expo-sqlite';
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 
-const db = SQLite.openDatabase("notes.db"); //Opens this function and save it as a file
+const db = SQLite.openDatabase("notes.db");
 console.log(FileSystem.documentDirectory);
-export default function NoteScreen({navigation, route}){ //u get an object rows which contains an obj array
 
+export default function NotesScreen({ navigation, route }) {
   const [arrayItem, setArrayItem] = useState([]);
+  
   function refreshNotes() {
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM notes",
         null,
-        (txObj, { rows: { _array } }) => setArrayItem(_array),
+        (txObj, { rows: { _array } }) => {console.log(_array), setArrayItem(_array)},
         (txObj, error) => console.log(`Error: ${error}`)
       );
     });
-  } //FUnction comes back with array result
+  }
 
-   //Set up database on first run since pass empty array it runs once
-   useEffect(() => {
+  // This is to set up the database on first run
+  useEffect(() => {
     db.transaction(
       (tx) => {
         tx.executeSql(
@@ -38,11 +43,27 @@ export default function NoteScreen({navigation, route}){ //u get an object rows 
       refreshNotes
     );
   }, []);
+  // This is to set up the top right button
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity onPress={addNote}>
+          <Ionicons
+            name="ios-create-outline"
+            size={30}
+            color="black"
+           
+          />
+        </TouchableOpacity>
+      ),
+    });
+  });
 
-  //useEffect procs when route.params.text is added //db.transaction((tx) => {}, null, refreshNotes)
+  // Monitor route.params for changes and add items to the database
   useEffect(() => {
     console.log("watching params")
     if (route.params?.text) {
+      console.log("inside insert")
       db.transaction(
         (tx) => {
           tx.executeSql("INSERT INTO notes (done, title) VALUES (0, ?)", [
@@ -52,51 +73,46 @@ export default function NoteScreen({navigation, route}){ //u get an object rows 
         null,
         refreshNotes
       );
-    }
+    }else{console.log("insert isn't happening or params not working")}
   }, [route.params?.text]);
 
-  //headerRight () because its a return
-    useEffect(()=> {
-      navigation.setOptions({
-        headerRight:()=>(
-          <TouchableOpacity onPress={addNote}>
-            <Ionicons name="ios-create-outline" size={24} style={{marginRight:10,}}></Ionicons>
-          </TouchableOpacity>
-        )
-      })
-    })
+  function addNote() {
+    navigation.navigate("Modal");
+  }
 
-    function addNote(){
-      navigation.navigate("Modal");
-    }
-    function renderItem({item}){
-    return <View style={{
-      padding:10,
-      paddingTop:10,
-      paddingBottom:10,
-      borderBottomColor:"black",
-      borderBottomWidth:1,
-      }}>
-      <Text>{item.title}</Text></View>
-    }
+  function renderItem({ item }) {
+    return (
+      <View
+        style={{
+          padding: 10,
+          paddingTop: 20,
+          paddingBottom: 20,
+          borderBottomColor: "#ccc",
+          borderBottomWidth: 1,
+        }}
+      >
+        <Text>{item.title}</Text>
+      </View>
+    );
+  }
 
-    return(
-      <View style={styles.container}>
-        <FlatList style={{width:"100%"}} 
+  return (
+    <View style={styles.container}>
+      <FlatList
         data={arrayItem}
-         renderItem={renderItem} 
-         keyExtractor={(item)=>item.id.toString()}></FlatList>
-        </View>
-    )
+        renderItem={renderItem}
+        style={{ width: "100%" }}
+        keyExtractor={(item) => item.id.toString()}
+      />
+    </View>
+  );
 }
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor:"#FFCF99",
-    },
-  });
-  
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffc",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
